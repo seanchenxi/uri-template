@@ -40,19 +40,19 @@ public class UriTemplateBuilderTest {
         .baseUrl("http://www.google.com").literal("/ooo")
         .build();
 
-    System.out.println(uriTemplate.getTemplate());
+    System.out.println(uriTemplate.template());
 
     Map<String, Object> values = new HashMap<String, Object>();
-    values.put("name", "XiCHEN");
+//    values.put("name", "XiCHEN");
 
     Map<String, Object> subValues = new HashMap<String, Object>();
-    subValues.put("city", "Tangshan");
-    subValues.put("country", "China");
+//    subValues.put("city", "Tangshan");
+//    subValues.put("country", "China");
     values.put("adr", subValues);
-    values.put("list", Arrays.asList(""));
+    values.put("list", Arrays.asList("one","true"));
     uriTemplate.setValues(values);
 
-    String compile = uriTemplate.compile();
+    String compile = uriTemplate.expand();
 
     System.out.println(compile);
 
@@ -61,8 +61,15 @@ public class UriTemplateBuilderTest {
         .baseUrl("http://www.google.com").literal("/ooo")
         .build();
 
-    Assert.assertEquals(uriTemplate.getTemplate(), uriTemplate2.getTemplate());
+    Assert.assertEquals(uriTemplate.template(), uriTemplate2.template());
 
+    UriTemplate uriTemplate3 = UriTemplateBuilder.create("http://www.google.com/lalala/ooo{?name:4,adr*,list*}").build();
+
+    String compile2=uriTemplate3.expand(values);
+    System.out.println(compile2);
+
+    System.out.println(uriTemplate3);
+    Assert.assertNotEquals(uriTemplate3.template(), uriTemplate2.template());
   }
 
 }

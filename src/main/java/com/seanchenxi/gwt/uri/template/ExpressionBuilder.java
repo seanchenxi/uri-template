@@ -62,6 +62,10 @@ public class ExpressionBuilder {
     return builder;
   }
 
+  public static Expression wrap(String expression) {
+    return create(Expression.OPEN + expression + Expression.CLOSE).build();
+  }
+
   public static ExpressionBuilder simple(VarSpec... varSpec) {
     return ExpressionBuilder.create(Operator.NUL, varSpec);
   }

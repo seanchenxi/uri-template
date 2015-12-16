@@ -18,20 +18,27 @@ package com.seanchenxi.gwt.uri.template;
 
 import com.seanchenxi.gwt.uri.exception.MalformedExpressionException;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.seanchenxi.gwt.uri.template.StringPool.COMMA;
+import static com.seanchenxi.gwt.uri.template.StringPool.EMPTY;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
 
 /**
  * @author Xi CHEN
  * @since 13/12/15.
  */
-public class VarSpec {
+public class VarSpec extends TemplatePartial<VarSpec.Value> {
 
-  static class Expansion implements Iterable<String> {
+  public interface JoinFunction {
+    String prefix(String current);
+  }
+
+  public static class Value implements Iterable<String> {
 
     enum Type {
       STRING, LIST, PAIR
@@ -40,13 +47,13 @@ public class VarSpec {
     private Type type;
     private List<String> values;
 
-    Expansion(Type type, List<String> values) {
+    Value(Type type, List<String> values) {
       this.type = type;
-      this.values = Collections.unmodifiableList(values);
+      this.values = unmodifiableList(values == null ? new ArrayList<String>() : values);
     }
 
-    public Expansion(String item) {
-      this(Type.STRING, item == null ? Collections.<String>emptyList() : Collections.singletonList(item));
+    public Value(String item) {
+      this(Type.STRING, item == null ? null : singletonList(item.trim()));
     }
 
     boolean is(Type type){
@@ -57,21 +64,33 @@ public class VarSpec {
       return type;
     }
 
-    List<String> getValues() {
-      return values;
+    public boolean isEmpty() {
+      return values.isEmpty() || (is(Type.STRING) && values.get(0).isEmpty());
     }
 
-    public String getValue() {
-      return values.isEmpty() ? null : values.get(0);
+    public String join(String sep){
+      return join(sep, null);
+    }
+
+    public String join(String sep, JoinFunction fn){
+      StringBuilder builder = new StringBuilder();
+      boolean isFirstSub = true;
+      for(final String varValue : values){
+        if(!isFirstSub){
+          builder.append(sep);
+        }
+        if(fn != null){
+          builder.append(fn.prefix(varValue));
+        }
+        builder.append(varValue);
+        isFirstSub = false;
+      }
+      return builder.toString();
     }
 
     @Override
     public Iterator<String> iterator() {
       return values.iterator();
-    }
-
-    public boolean isEmpty() {
-      return values.isEmpty() || (this.type.equals(Type.STRING) && values.get(0).isEmpty());
     }
   }
 
@@ -101,26 +120,28 @@ public class VarSpec {
     return modifier;
   }
 
-  public Expansion expand(Object value){
+  public boolean is(Modifier modifier) {
+    return this.modifier.equals(modifier);
+  }
+
+  @Override
+  public String template() {
+    return this.name + this.modifier;
+  }
+
+  @Override
+  public Value expand(Map<String, Object> values){
+    Object value = values == null ? null : values.get(name);
     if(value == null){
       return null;
     }else if(value instanceof Map){
       boolean pair = Modifier.EXPLODE.equals(this.modifier);
-      return ExpansionUtils.expand((Map) value, pair);
+      return ExpansionProcessor.expand((Map) value, pair);
     }else if(value instanceof Iterable){
-      return ExpansionUtils.expand((Iterable) value);
+      return ExpansionProcessor.expand((Iterable) value);
     }else{
-      return ExpansionUtils.print(value);
+      return ExpansionProcessor.print(value);
     }
-  }
-
-  public boolean isExplode() {
-    return Modifier.EXPLODE.equals(this.modifier);
-  }
-
-  @Override
-  public String toString() {
-    return this.name + this.modifier;
   }
 
   private String validateName(String name) {

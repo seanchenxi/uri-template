@@ -41,20 +41,22 @@ public class PrefixVarSpec extends VarSpec {
   }
 
   @Override
-  public Expansion expand(Object value){
-    if(value == null){
-      return null;
-    }else if(value instanceof Map){
-      return ExpansionUtils.expand((Map) value, maxLength);
-    }else if(value instanceof Iterable){
-      return ExpansionUtils.expand((Iterable) value, maxLength);
-    }else{
-      return ExpansionUtils.print(value, maxLength);
-    }
+  public String template() {
+    return super.template() + maxLength;
   }
 
   @Override
-  public String toString() {
-    return super.toString() + maxLength;
+  public Value expand(Map<String, Object> values){
+    Object value = values == null ? null : values.get(getName());
+    if(value == null){
+      return null;
+    }else if(value instanceof Map){
+      return ExpansionProcessor.expand((Map) value, maxLength);
+    }else if(value instanceof Iterable){
+      return ExpansionProcessor.expand((Iterable) value, maxLength);
+    }else{
+      return ExpansionProcessor.print(value, maxLength);
+    }
   }
+
 }

@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Xi CHEN
  * @since 13/12/15.
  */
-public class Literal extends TemplatePartial {
+public class Literal extends TemplatePartial<String> {
 
   public static Literal wrap(String literal){
     return new Literal(literal);
@@ -48,7 +48,7 @@ public class Literal extends TemplatePartial {
   }
 
   @Override
-  public String compile(Map<String, Object> values) {
+  public String expand(Map<String, Object> values) {
     return getValue();
   }
 

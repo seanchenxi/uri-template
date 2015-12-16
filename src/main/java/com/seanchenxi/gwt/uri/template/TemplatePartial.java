@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Xi CHEN
  * @since 13/12/15.
  */
-public abstract class TemplatePartial {
+public abstract class TemplatePartial<V> {
 
   /**
    * The expression position in the URI template
@@ -42,7 +42,7 @@ public abstract class TemplatePartial {
     return template();
   }
 
-  public abstract String compile(Map<String, Object> values);
+  public abstract V expand(Map<String, Object> value);
 
   public abstract String template();
 

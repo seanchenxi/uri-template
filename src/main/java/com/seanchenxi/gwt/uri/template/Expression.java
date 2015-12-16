@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.seanchenxi.gwt.uri.template.StringPool.COMMA;
+import static com.seanchenxi.gwt.uri.template.StringPool.EMPTY;
 import static com.seanchenxi.gwt.uri.template.StringPool.EQUAL;
-import static com.seanchenxi.gwt.uri.template.VarSpec.Expansion.Type.LIST;
-import static com.seanchenxi.gwt.uri.template.VarSpec.Expansion.Type.PAIR;
-import static com.seanchenxi.gwt.uri.template.VarSpec.Expansion.Type.STRING;
+import static com.seanchenxi.gwt.uri.template.VarSpec.Value.Type.LIST;
+import static com.seanchenxi.gwt.uri.template.VarSpec.Value.Type.PAIR;
+import static com.seanchenxi.gwt.uri.template.VarSpec.Value.Type.STRING;
 
 /**
  * <p>
@@ -61,11 +62,15 @@ import static com.seanchenxi.gwt.uri.template.VarSpec.Expansion.Type.STRING;
  * @author Xi CHEN
  * @since 13/12/15
  */
-public class Expression extends TemplatePartial {
+public class Expression extends TemplatePartial<String> {
 
   public static final String OPEN = "{";
 
   public static final String CLOSE = "}";
+
+  public static final String ESCAPED_OPEN = "\\{";
+
+  public static final String ESCAPED_CLOSE = "\\}";
 
   /**
    * {@link Operator} defines the expression type and its corresponding expansion process
@@ -94,65 +99,6 @@ public class Expression extends TemplatePartial {
   }
 
   @Override
-  public String compile(Map<String, Object> values) {
-    StringBuilder builder = new StringBuilder();
-    boolean isFirst = true;
-    for (VarSpec varSpec : varSpecs) {
-      String varName = varSpec.getName();
-      Object object = values.get(varName);
-      if (object == null) {
-        continue;
-      }
-
-      builder.append(isFirst ? operator.getFirst() : operator.getSep());
-
-      VarSpec.Expansion expansion = varSpec.expand(object);
-      if (expansion.is(STRING)) {
-        if (operator.isNamed()) {
-          builder.append(varName);
-        }
-        builder.append(expansion.isEmpty() ? operator.getIfemp() : EQUAL).append(expansion.getValue());
-      } else if (!varSpec.isExplode()) {
-        if (operator.isNamed()) {
-          builder.append(varName);
-        }
-        builder.append(expansion.isEmpty() ? operator.getIfemp() : EQUAL);
-        boolean isFirstSub = true;
-        for (String varValue : expansion) {
-          if (!isFirstSub) {
-            builder.append(COMMA);
-          }
-          builder.append(varValue);
-          isFirstSub = false;
-        }
-      } else {
-        if (operator.isNamed()) {
-          boolean isFirstSub = true;
-          for (String varValue : expansion) {
-            if (!isFirstSub) {
-              builder.append(operator.getSep());
-            }
-            if (expansion.is(LIST)) {
-              builder.append(varName)
-                  .append(varValue.isEmpty() ? operator.getIfemp() : EQUAL)
-                  .append(varValue);
-            } else if (expansion.is(PAIR)) {
-              builder.append(varValue);
-            }
-            isFirstSub = false;
-          }
-        } else {
-          for (String varValue : expansion) {
-            builder.append(varValue);
-          }
-        }
-      }
-      isFirst = false;
-    }
-    return builder.toString();
-  }
-
-  @Override
   public String template() {
     StringBuilder sb = new StringBuilder(Expression.OPEN).append(operator);
     Iterator<VarSpec> iterator = varSpecs.iterator();
@@ -163,6 +109,56 @@ public class Expression extends TemplatePartial {
       }
     }
     return sb.append(Expression.CLOSE).toString();
+  }
+
+  @Override
+  public String expand(Map<String, Object> values) {
+    StringBuilder builder = new StringBuilder();
+    boolean isFirst = true;
+    for (final VarSpec varSpec : varSpecs) {
+      VarSpec.Value valueParts = varSpec.expand(values);
+      if (valueParts == null) {
+        continue;
+      }
+      boolean isNamed = operator.isNamed();
+      boolean isEmpty = valueParts.isEmpty();
+      boolean isExplode = varSpec.is(Modifier.EXPLODE);
+      if(isNamed || !isEmpty){
+        builder.append(isFirst ? operator.getFirst() : operator.getSep());
+      }
+
+      if (valueParts.is(STRING) || !isExplode) {
+        if(isNamed){
+          builder.append(varSpec.getName());
+        }
+        if(valueParts.isEmpty()){
+          builder.append(operator.getIfemp());
+        }else{
+          builder.append(EQUAL).append(valueParts.join(COMMA));
+        }
+      } else {
+        if (isNamed) {
+          if(isEmpty){
+            builder.append(varSpec.getName()).append(operator.getIfemp());
+          }else if (valueParts.is(LIST)) {
+            VarSpec.JoinFunction joinFn = new VarSpec.JoinFunction() {
+              @Override
+              public String prefix(String current) {
+                return varSpec.getName() + (current.isEmpty() ? operator.getIfemp() : EQUAL);
+              }
+            };
+            builder.append(valueParts.join(operator.getSep(), joinFn));
+          }else if (valueParts.is(PAIR)) {
+            builder.append(valueParts.join(operator.getSep()));
+          }
+        } else {
+          builder.append(valueParts.join(operator.getSep()));
+        }
+      }
+      isFirst = false;
+    }
+
+    return builder.length() > 1 ? builder.toString() : EMPTY;
   }
 
 }

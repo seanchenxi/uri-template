@@ -29,13 +29,30 @@ import static com.seanchenxi.gwt.uri.template.StringPool.EQUAL;
  * @author Xi CHEN
  * @since 14/12/15.
  */
-public class ExpansionUtils {
+public class ExpansionProcessor {
 
-  public static VarSpec.Expansion expand(Map value){
+  public interface JoinFunction{
+    String prefix(String current);
+  }
+
+  public static StringBuilder join(VarSpec.Value value, String separator, JoinFunction fn){
+    StringBuilder builder = new StringBuilder();
+    boolean isFirstSub = true;
+    for(String varValue : value){
+      if(!isFirstSub){
+        builder.append(separator);
+      }
+      builder.append(fn.prefix(varValue)).append(varValue);
+      isFirstSub = false;
+    }
+    return builder;
+  }
+
+  public static VarSpec.Value expand(Map value){
     return expand(value, IGNORE_MAX_LENGTH);
   }
 
-  public static VarSpec.Expansion expand(Map value, boolean pair){
+  public static VarSpec.Value expand(Map value, boolean pair){
     if(value != null && pair){
       List<String> result = new ArrayList<String>();
       @SuppressWarnings("unchecked")
@@ -45,13 +62,13 @@ public class ExpansionUtils {
         String keyValue = doPrint(entry.getValue());
         result.add(key + EQUAL + (keyValue == null ? EMPTY : keyValue));
       }
-      return new VarSpec.Expansion(VarSpec.Expansion.Type.PAIR, result);
+      return new VarSpec.Value(VarSpec.Value.Type.PAIR, result);
     }else{
       return expand(value);
     }
   }
 
-  public static VarSpec.Expansion expand(Map value, int maxLength){
+  public static VarSpec.Value expand(Map value, int maxLength){
     if(value == null){
       return null;
     }
@@ -62,29 +79,29 @@ public class ExpansionUtils {
       addIfNotNull(result, doPrint(entry.getKey(), maxLength));
       addIfNotNull(result, doPrint(entry.getValue(), maxLength));
     }
-    return new VarSpec.Expansion(VarSpec.Expansion.Type.PAIR, result);
+    return new VarSpec.Value(VarSpec.Value.Type.PAIR, result);
   }
 
-  public static VarSpec.Expansion expand(Iterable iterable){
+  public static VarSpec.Value expand(Iterable iterable){
     return expand(iterable, IGNORE_MAX_LENGTH);
   }
 
 
-  public static VarSpec.Expansion expand(Iterable iterable, int maxLength){
+  public static VarSpec.Value expand(Iterable iterable, int maxLength){
     List<String> result = new ArrayList<String>();
     for(Object item : iterable){
       addIfNotNull(result, doPrint(item, maxLength));
 
     }
-    return new VarSpec.Expansion(VarSpec.Expansion.Type.LIST, result);
+    return new VarSpec.Value(VarSpec.Value.Type.LIST, result);
   }
 
-  public static VarSpec.Expansion print(Object value) {
+  public static VarSpec.Value print(Object value) {
     return print(value, IGNORE_MAX_LENGTH);
   }
 
-  public static VarSpec.Expansion print(Object object, int maxLength){
-    return new VarSpec.Expansion(doPrint(object, maxLength));
+  public static VarSpec.Value print(Object object, int maxLength){
+    return new VarSpec.Value(doPrint(object, maxLength));
   }
 
   private static String doPrint(Object value) {

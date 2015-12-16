@@ -37,6 +37,35 @@ public class UriTemplateBuilder {
     return new UriTemplateBuilder();
   }
 
+  public static UriTemplateBuilder create(String raw){
+    UriTemplateBuilder builder = new UriTemplateBuilder();
+    String[] split = raw.split(Expression.ESCAPED_OPEN);
+    for(String partial : split){
+      findTemplatePartial(partial, builder.partials);
+    }
+    return builder;
+  }
+
+  private static void findTemplatePartial(String partial, List<TemplatePartial> partials) {
+    if(!partial.trim().isEmpty()){
+      if(!partial.contains(Expression.CLOSE)){
+        partials.add(Literal.wrap(partial));
+      }else{
+        String[] split = partial.split(Expression.ESCAPED_CLOSE);
+        String expression = split[0].trim();
+        if(!expression.isEmpty()){
+          partials.add(ExpressionBuilder.wrap(expression));
+        }
+        if(split.length > 1){
+          String literal = split[1];
+          if(!literal.isEmpty()){
+            partials.add(Literal.wrap(literal));
+          }
+        }
+      }
+    }
+  }
+
   private String baseUrl;
 
   private List<TemplatePartial> partials = new ArrayList<TemplatePartial>();

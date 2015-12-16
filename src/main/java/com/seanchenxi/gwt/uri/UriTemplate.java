@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Xi CHEN
  * @since 13/12/15.
  */
-public class UriTemplate {
+public class UriTemplate extends TemplatePartial<String> {
 
   private List<TemplatePartial> partials = new ArrayList<TemplatePartial>();
 
@@ -57,7 +57,21 @@ public class UriTemplate {
     this.values = values;
   }
 
-  public String getTemplate(){
+  public String expand(){
+    return expand(Collections.unmodifiableMap(this.values));
+  }
+
+  @Override
+  public String expand(Map<String, Object> values){
+    StringBuilder sb = new StringBuilder();
+    for(TemplatePartial partial : partials){
+      sb.append(partial.expand(values));
+    }
+    return sb.toString();
+  }
+
+  @Override
+  public String template(){
     if(this.template == null){
       StringBuilder sb = new StringBuilder();
       for(TemplatePartial partial : partials){
@@ -66,15 +80,6 @@ public class UriTemplate {
       return this.template = sb.toString();
     }
     return this.template;
-  }
-
-  public String compile(){
-    Map<String, Object> values = Collections.unmodifiableMap(this.values);
-    StringBuilder sb = new StringBuilder();
-    for(TemplatePartial partial : partials){
-      sb.append(partial.compile(values));
-    }
-    return sb.toString();
   }
 
 }
