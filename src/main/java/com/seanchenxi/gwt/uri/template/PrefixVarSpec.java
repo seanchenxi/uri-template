@@ -18,6 +18,10 @@ package com.seanchenxi.gwt.uri.template;
 
 import java.util.Map;
 
+/**
+ * @author Xi CHEN
+ * @since 14/12/15.
+ */
 public class PrefixVarSpec extends VarSpec {
 
   static final int IGNORE_MAX_LENGTH = 0;
