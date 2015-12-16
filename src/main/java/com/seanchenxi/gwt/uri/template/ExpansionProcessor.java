@@ -31,23 +31,6 @@ import static com.seanchenxi.gwt.uri.template.StringPool.EQUAL;
  */
 public class ExpansionProcessor {
 
-  public interface JoinFunction{
-    String prefix(String current);
-  }
-
-  public static StringBuilder join(VarSpec.Value value, String separator, JoinFunction fn){
-    StringBuilder builder = new StringBuilder();
-    boolean isFirstSub = true;
-    for(String varValue : value){
-      if(!isFirstSub){
-        builder.append(separator);
-      }
-      builder.append(fn.prefix(varValue)).append(varValue);
-      isFirstSub = false;
-    }
-    return builder;
-  }
-
   public static VarSpec.Value expand(Map value){
     return expand(value, IGNORE_MAX_LENGTH);
   }
