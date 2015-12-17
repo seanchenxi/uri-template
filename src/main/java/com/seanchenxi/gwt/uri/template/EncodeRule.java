@@ -16,6 +16,8 @@
 
 package com.seanchenxi.gwt.uri.template;
 
+import java.nio.charset.Charset;
+
 /**
  * <p>
  * Expression encode rule.
@@ -29,10 +31,38 @@ public enum EncodeRule {
   /**
    * means any character not in the unreserved set will be encoded
    */
-  U,
+  U(" %$&+,/:;=?@<>#%!{}"),
 
   /**
    * means any character not in the union of (unreserved / reserved / pct-encoding) will be encoded
    */
-  U_R
+  U_R(" %$&+:=?@<>#%{}");
+
+  private final String unsafe;
+
+  EncodeRule(String unsafe) {
+    this.unsafe = unsafe;
+  }
+
+  public String encode(String input) {
+    StringBuilder resultStr = new StringBuilder();
+    for (char ch : input.toCharArray()) {
+      if (isUnsafe(ch)) {
+        resultStr.append('%');
+        resultStr.append(toHex(ch / 16));
+        resultStr.append(toHex(ch % 16));
+      } else {
+        resultStr.append(ch);
+      }
+    }
+    return resultStr.toString();
+  }
+
+  private char toHex(int ch) {
+    return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
+  }
+
+  private boolean isUnsafe(char ch) {
+    return ch > 128 || ch < 0 || this.unsafe.indexOf(ch) > -1;
+  }
 }

@@ -55,11 +55,11 @@ public class PrefixVarSpec extends VarSpec {
     if(value == null){
       return null;
     }else if(value instanceof Map){
-      return ExpansionProcessor.expand((Map) value, maxLength);
+      return ExpansionProcessor.expand(getName(), (Map) value, maxLength);
     }else if(value instanceof Iterable){
-      return ExpansionProcessor.expand((Iterable) value, maxLength);
+      return ExpansionProcessor.expand(getName(),(Iterable) value, maxLength);
     }else{
-      return ExpansionProcessor.print(value, maxLength);
+      return ExpansionProcessor.print(getName(), value, maxLength);
     }
   }
 

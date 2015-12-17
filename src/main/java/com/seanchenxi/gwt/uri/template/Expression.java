@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.seanchenxi.gwt.uri.template.ExpansionProcessor.joinVar;
 import static com.seanchenxi.gwt.uri.template.StringPool.COMMA;
 import static com.seanchenxi.gwt.uri.template.StringPool.EMPTY;
 import static com.seanchenxi.gwt.uri.template.StringPool.EQUAL;
@@ -113,18 +114,23 @@ public class Expression extends TemplatePartial<String> {
 
   @Override
   public String expand(Map<String, Object> values) {
-    StringBuilder builder = new StringBuilder();
+    String separator = operator.getSep();
+    String whenEmpty = operator.getIfemp();
+    String whenFirst = operator.getFirst();
+    boolean isNamed = operator.isNamed();
     boolean isFirst = true;
+
+    StringBuilder builder = new StringBuilder();
     for (final VarSpec varSpec : varSpecs) {
       VarSpec.Value valueParts = varSpec.expand(values);
       if (valueParts == null) {
         continue;
       }
-      boolean isNamed = operator.isNamed();
+
       boolean isEmpty = valueParts.isEmpty();
       boolean isExplode = varSpec.is(Modifier.EXPLODE);
       if(isNamed || !isEmpty){
-        builder.append(isFirst ? operator.getFirst() : operator.getSep());
+        builder.append(isFirst ? whenFirst : separator);
       }
 
       if (valueParts.is(STRING) || !isExplode) {
@@ -132,27 +138,22 @@ public class Expression extends TemplatePartial<String> {
           builder.append(varSpec.getName());
         }
         if(valueParts.isEmpty()){
-          builder.append(operator.getIfemp());
-        }else{
-          builder.append(EQUAL).append(valueParts.join(COMMA));
+          builder.append(whenEmpty);
+        }else if(isNamed){
+          builder.append(EQUAL);
         }
+        builder.append(joinVar(valueParts, operator, COMMA));
       } else {
         if (isNamed) {
           if(isEmpty){
-            builder.append(varSpec.getName()).append(operator.getIfemp());
+            builder.append(varSpec.getName()).append(whenEmpty);
           }else if (valueParts.is(LIST)) {
-            VarSpec.JoinFunction joinFn = new VarSpec.JoinFunction() {
-              @Override
-              public String prefix(String current) {
-                return varSpec.getName() + (current.isEmpty() ? operator.getIfemp() : EQUAL);
-              }
-            };
-            builder.append(valueParts.join(operator.getSep(), joinFn));
+            builder.append(joinVar(valueParts, operator, true));
           }else if (valueParts.is(PAIR)) {
-            builder.append(valueParts.join(operator.getSep()));
+            builder.append(joinVar(valueParts, operator, false));
           }
         } else {
-          builder.append(valueParts.join(operator.getSep()));
+          builder.append(joinVar(valueParts, operator, false));
         }
       }
       isFirst = false;

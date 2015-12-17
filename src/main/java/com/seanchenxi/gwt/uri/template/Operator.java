@@ -66,7 +66,7 @@ public enum Operator {
    * @since Level-2
    * @see <a href="http://tools.ietf.org/html/rfc6570#section-3.2.3">Section 3.2.3 | RFC 6570</a>
    */
-  RESERVED(PLUS, SEPARATOR_DEFAULT, false, EMPTY, U_R),
+  RESERVED(PLUS, EMPTY, SEPARATOR_DEFAULT, false, EMPTY, U_R),
 
   /**
    * Fragment Expansion: {#var}
@@ -117,7 +117,7 @@ public enum Operator {
   public static Operator parseValue(String operator){
     if(operator != null && !operator.trim().isEmpty()){
       for(Operator op : values()){
-        if(op.first.equals(operator)){
+        if(op.sign.equals(operator)){
           return op;
         }
       }
@@ -129,6 +129,7 @@ public enum Operator {
     return Available.SET.contains(operator);
   }
 
+  private String sign;
   private String first;
   private final String sep;
   private final boolean named;
@@ -136,12 +137,21 @@ public enum Operator {
   private final EncodeRule allow;
 
   Operator(String first, String sep, boolean named, String ifemp, EncodeRule allow) {
+    this(first, first, sep, named, ifemp, allow);
+  }
+
+  Operator(String sign, String first, String sep, boolean named, String ifemp, EncodeRule allow) {
+    this.sign = sign;
     this.first = first;
     this.sep = sep;
     this.named = named;
     this.ifemp = ifemp;
     this.allow = allow;
-    Available.SET.add(first);
+    Available.SET.add(sign);
+  }
+
+  public String getSign() {
+    return sign;
   }
 
   public String getFirst() {
@@ -166,6 +176,6 @@ public enum Operator {
 
   @Override
   public String toString() {
-    return this.first;
+    return this.sign;
   }
 }

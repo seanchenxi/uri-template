@@ -23,8 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.seanchenxi.gwt.uri.template.ExpansionProcessor.print;
 import static com.seanchenxi.gwt.uri.template.StringPool.COMMA;
-import static com.seanchenxi.gwt.uri.template.StringPool.EMPTY;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 
@@ -34,26 +34,32 @@ import static java.util.Collections.unmodifiableList;
  */
 public class VarSpec extends TemplatePartial<VarSpec.Value> {
 
-  public interface JoinFunction {
-    String prefix(String current);
-  }
-
-  public static class Value implements Iterable<String> {
+  public static class Value<T> implements Iterable<T> {
 
     enum Type {
       STRING, LIST, PAIR
     }
 
     private Type type;
-    private List<String> values;
+    private List<T> values;
+    private String name;
 
-    Value(Type type, List<String> values) {
+    Value(String name, Type type, List<T> values) {
+      this.name = name;
       this.type = type;
-      this.values = unmodifiableList(values == null ? new ArrayList<String>() : values);
+      this.values = unmodifiableList(values == null ? new ArrayList<T>() : values);
     }
 
-    public Value(String item) {
-      this(Type.STRING, item == null ? null : singletonList(item.trim()));
+    public Value(String name, T item) {
+      this(name, Type.STRING, item == null ? null : singletonList(item));
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    private void setName(String name) {
+      this.name = name;
     }
 
     boolean is(Type type){
@@ -65,33 +71,14 @@ public class VarSpec extends TemplatePartial<VarSpec.Value> {
     }
 
     public boolean isEmpty() {
-      return values.isEmpty() || (is(Type.STRING) && values.get(0).isEmpty());
-    }
-
-    public String join(String sep){
-      return join(sep, null);
-    }
-
-    public String join(String sep, JoinFunction fn){
-      StringBuilder builder = new StringBuilder();
-      boolean isFirstSub = true;
-      for(final String varValue : values){
-        if(!isFirstSub){
-          builder.append(sep);
-        }
-        if(fn != null){
-          builder.append(fn.prefix(varValue));
-        }
-        builder.append(varValue);
-        isFirstSub = false;
-      }
-      return builder.toString();
+      return values.isEmpty() || (is(Type.STRING) && String.valueOf(values.get(0)).isEmpty());
     }
 
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<T> iterator() {
       return values.iterator();
     }
+
   }
 
   static final String SEPARATOR = COMMA;
@@ -130,17 +117,17 @@ public class VarSpec extends TemplatePartial<VarSpec.Value> {
   }
 
   @Override
-  public Value expand(Map<String, Object> values){
+  public Value expand(Map<String, Object> values) {
     Object value = values == null ? null : values.get(name);
-    if(value == null){
+    if (value == null) {
       return null;
-    }else if(value instanceof Map){
+    } else if (value instanceof Map) {
       boolean pair = Modifier.EXPLODE.equals(this.modifier);
-      return ExpansionProcessor.expand((Map) value, pair);
-    }else if(value instanceof Iterable){
-      return ExpansionProcessor.expand((Iterable) value);
-    }else{
-      return ExpansionProcessor.print(value);
+      return ExpansionProcessor.expand(name, (Map) value, pair);
+    } else if (value instanceof Iterable) {
+      return ExpansionProcessor.expand(name, (Iterable) value);
+    } else {
+      return ExpansionProcessor.expand(name, value);
     }
   }
 
