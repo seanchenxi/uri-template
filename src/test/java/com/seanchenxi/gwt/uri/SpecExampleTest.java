@@ -46,6 +46,14 @@ public class SpecExampleTest{
   }
 
   @Test @Ignore
+  public void testSpecExampleBySection() throws IOException {
+    Map tests = loadTestJsonSpec("/test-spec/spec-examples-by-section.json");
+    assumeNotNull(tests);
+    assumeFalse(tests.isEmpty());
+    doTest(tests);
+  }
+
+  @Test @Ignore
   public void testExtendedTests() throws IOException {
     Map tests = loadTestJsonSpec("/test-spec/extended-tests.json");
     assumeNotNull(tests);
