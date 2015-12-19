@@ -17,7 +17,6 @@
 package com.seanchenxi.gwt.uri;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class SpecExampleTest{
     doTest(tests);
   }
 
-  @Test @Ignore
+  @Test
   public void testSpecExampleBySection() throws IOException {
     Map tests = loadTestJsonSpec("/test-spec/spec-examples-by-section.json");
     assumeNotNull(tests);
@@ -53,7 +52,7 @@ public class SpecExampleTest{
     doTest(tests);
   }
 
-  @Test @Ignore
+  @Test
   public void testExtendedTests() throws IOException {
     Map tests = loadTestJsonSpec("/test-spec/extended-tests.json");
     assumeNotNull(tests);

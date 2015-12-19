@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.seanchenxi.gwt.uri.template.ExpansionProcessor.print;
 import static com.seanchenxi.gwt.uri.template.StringPool.COMMA;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
@@ -79,6 +78,14 @@ public class VarSpec extends TemplatePartial<VarSpec.Value> {
       return values.iterator();
     }
 
+    @Override
+    public String toString() {
+      return "Value{" +
+          "type=" + type +
+          ", values=" + values +
+          ", name='" + name + '\'' +
+          '}';
+    }
   }
 
   static final String SEPARATOR = COMMA;

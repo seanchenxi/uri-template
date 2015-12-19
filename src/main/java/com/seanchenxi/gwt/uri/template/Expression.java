@@ -127,17 +127,21 @@ public class Expression extends TemplatePartial<String> {
         continue;
       }
 
+      boolean isString = valueParts.is(STRING);
       boolean isEmpty = valueParts.isEmpty();
       boolean isExplode = varSpec.is(Modifier.EXPLODE);
-      if(isNamed || !isEmpty){
+      if(isNamed || !isEmpty || isString){
         builder.append(isFirst ? whenFirst : separator);
       }
 
-      if (valueParts.is(STRING) || !isExplode) {
+      if (isString || !isExplode) {
+        if(!isString && isEmpty){
+          continue;
+        }
         if(isNamed){
           builder.append(varSpec.getName());
         }
-        if(valueParts.isEmpty()){
+        if(isEmpty){
           builder.append(whenEmpty);
         }else if(isNamed){
           builder.append(EQUAL);
@@ -146,7 +150,7 @@ public class Expression extends TemplatePartial<String> {
       } else {
         if (isNamed) {
           if(isEmpty){
-            builder.append(varSpec.getName()).append(whenEmpty);
+            continue;
           }else if (valueParts.is(LIST)) {
             builder.append(joinVar(valueParts, operator, true));
           }else if (valueParts.is(PAIR)) {
@@ -159,7 +163,7 @@ public class Expression extends TemplatePartial<String> {
       isFirst = false;
     }
 
-    return builder.length() > 1 ? builder.toString() : EMPTY;
+    return builder.length() > 1 || !isNamed ? builder.toString() : EMPTY;
   }
 
 }
