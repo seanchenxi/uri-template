@@ -16,7 +16,7 @@
 
 package com.seanchenxi.gwt.uri.template;
 
-import com.seanchenxi.gwt.uri.exception.MalformedExpressionException;
+import com.seanchenxi.gwt.uri.template.exception.MalformedExpressionException;
 
 /**
  * @author Xi CHEN
