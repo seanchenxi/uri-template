@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seanchenxi.gwt.uri.exception;
+package com.seanchenxi.gwt.uri.template.exception;
 
 /**
  * @author Xi CHEN

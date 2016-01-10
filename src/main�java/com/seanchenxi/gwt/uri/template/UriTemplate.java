@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.seanchenxi.gwt.uri;
-
-import com.seanchenxi.gwt.uri.template.TemplatePartial;
+package com.seanchenxi.gwt.uri.template;
 
 import java.util.ArrayList;
 import java.util.Collections;

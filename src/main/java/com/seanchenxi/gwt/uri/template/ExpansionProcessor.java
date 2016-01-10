@@ -30,7 +30,7 @@ import static com.seanchenxi.gwt.uri.template.StringPool.EQUAL;
  * @author Xi CHEN
  * @since 14/12/15.
  */
-public class ExpansionProcessor {
+class ExpansionProcessor {
 
   static StringBuilder joinVar(VarSpec.Value value, Operator operator, boolean named){
     return joinVar(value, operator, null, named);

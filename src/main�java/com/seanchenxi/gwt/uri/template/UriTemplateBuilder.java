@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-package com.seanchenxi.gwt.uri;
-
-import com.seanchenxi.gwt.uri.template.Expression;
-import com.seanchenxi.gwt.uri.template.ExpressionBuilder;
-import com.seanchenxi.gwt.uri.template.Literal;
-import com.seanchenxi.gwt.uri.template.TemplatePartial;
-import com.seanchenxi.gwt.uri.template.VarSpec;
+package com.seanchenxi.gwt.uri.template;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +68,16 @@ public class UriTemplateBuilder {
 
   public UriTemplateBuilder baseUrl(String baseUrl){
     this.baseUrl = baseUrl;
+    return this;
+  }
+
+  public UriTemplateBuilder raw(String raw) {
+    if(raw != null && !raw.trim().isEmpty()){
+      String[] split = raw.split(Expression.ESCAPED_OPEN);
+      for(String partial : split){
+        UriTemplateBuilder.findTemplatePartial(partial, partials);
+      }
+    }
     return this;
   }
 

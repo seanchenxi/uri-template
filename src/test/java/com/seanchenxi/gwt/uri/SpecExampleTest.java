@@ -17,6 +17,8 @@
 package com.seanchenxi.gwt.uri;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seanchenxi.gwt.uri.template.UriTemplate;
+import com.seanchenxi.gwt.uri.template.UriTemplateBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
